@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<config>
+	<title>@@ENVXXX@@ / @@ENVYYY@@ Process Comparison</title>
+	<database>
+		<name>@@ENVXXX@@</name>
+		<url>@@ENVXXX.DBURL@@</url>
+		<user>@@ENVXXX.DBUSER@@</user>
+		<pwd>@@ENVXXX.DBPWD@@</pwd>
+		<driver>oracle.jdbc.OracleDriver</driver>
+		<prefix-schema>@@ENVXXX.DBPREFIXSCHEMA@@</prefix-schema>
+		<active>true</active>
+	</database>
+	<database>
+		<name>@@ENVYYY@@</name>
+		<url>@@ENVYYY.DBURL@@</url>
+		<user>@@ENVYYY.DBUSER@@</user>
+		<pwd>@@ENVYYY.DBPWD@@</pwd>
+		<driver>oracle.jdbc.OracleDriver</driver>
+		<prefix-schema>@@ENVYYY.DBPREFIXSCHEMA@@</prefix-schema>
+		<active>true</active>
+	</database>
+	<default-scenario>
+		<type>env</type>
+		<reference>@@ENVXXX@@</reference>
+		<target>@@ENVYYY@@</target>
+	</default-scenario>	
+	<compare>	
+		<query>
+			<name>Trade</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>DESCRIPTION, product_type, settlement_date, quantity, trade_price, trade_currency, settle_currency, trader_name, cpty_id, book_id, trade_status, exchange_id, accrual, bundle_id, trade_action, internal_reference, external_reference, split_currency, split_book_price, split_base_price, sales_person, mirror_trade_id, neg_trade_price, neg_price_type, custom_xfrule_b, le_role, market_type, market_info, alternate_date, trade.custom_data as custom_data</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc</from>
+				<where>trade.PRODUCT_ID = product_desc.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description</orderby>
+				<identifiers>external_reference,description</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Product Desc</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference, description, product_type, product_family, product_sub_type, product_extended_type,currency, quote_name, rate_index, needs_reset_b, maturity_date, product_desc.custom_data, und_security_id, issuer_id, pricer_override_key, mdi_override_key</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc</from>
+				<where>trade.PRODUCT_ID = product_desc.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description</orderby>
+				<identifiers>external_reference,description</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Trade Fee</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference,description, fee_type,fee_date,start_date,end_date,currency_code,amount,input,legal_entity_id,known_date,external_id,fee_role,fee_desc,fee_method,billing_ccy,fx_rate</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@trade_fee</from>
+				<where>trade.trade_id = trade_fee.trade_id and product_desc.product_id=trade.product_id and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description,fee_type</orderby>
+				<identifiers>external_reference,description,fee_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Cash Flow</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference,description, flow_id,sub_id,flow_class_name,flow_type,start_date,end_date,currency_code,payment_date,flow_amount,notional_amount,interest_rate,daycount_code,manual_amt_b,rate_index_spread,reset_date,CASH_FLOW_SIMPLE.rate_index as rate_index,fixed_rate_b,rate_index_factor,manual_reset_b,interpolated_b,interp_index,sample_start_date,sample_end_date,reset_avg_method,sample_freq,sample_weekday,reset_cutoff,external_id,rate_rounding,rate_rounding_dec,interp_rounding,interp_rnding_dec,basis_convert_b,fx_reset_date,fx_rate,manual_fx_rate_b,collateral_id</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@CASH_FLOW_SIMPLE</from>
+				<where>product_desc.product_id=trade.product_id and product_desc.product_id = CASH_FLOW_SIMPLE.product_id and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description,flow_id</orderby>
+				<identifiers>external_reference,description,flow_id</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Product Future</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference,description,contract_name, trading_start_date, trading_end_date, first_notif_date, last_notif_date, first_deliv_date, last_delivery_date, expiration_date, product_future.entered_date as entered_date, product_future.entered_user as entered_user</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@product_future, @@prefix@@future_contract</from>
+				<where>trade.PRODUCT_ID = product_desc.PRODUCT_ID and product_desc.PRODUCT_ID = product_future.PRODUCT_ID and product_future.CONTRACT_ID = future_contract.CONTRACT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description</orderby>
+				<identifiers>external_reference,description</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Product CallNotice</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference,description,start_date,end_date,currency_code,principal_amount,fixed_rate_b,fixed_rate,daycount_code,payment_holidays,open_term_b,notice_days,roll_over_b,payment_frequency,compound_frequency,date_roll_code,PRODUCT_CALL_NOT.rate_index as rate_index,rate_index_spread,period_gen_rule,disc_cash_flow_b,stub_rule,start_stub_date,end_stub_date,rolling_day,linked_id,roll_over_amount,capitalize_int,custom_flows_b,roll_over_date,amortizing_b,amort_type,amort_amount,cashflow_locks,cashflow_changed,prin_exch,settlement_type,compounding_type,payment_date_rule,compound_date_rule,rounding_method,fst_stb_cust_idx_b,fst_stb_idx_x,fst_stb_idx_y,lst_stb_cust_idx_b,lst_stb_idx_x,lst_stb_idx_y,loan_b,notice_bus_days_b,def_reset_offset_b,reset_offset,reset_off_busday_b,reset_holidays,reset_timing,sales_margin,pmt_offset</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@PRODUCT_CALL_NOT</from>
+				<where>trade.PRODUCT_ID = product_desc.PRODUCT_ID and product_desc.PRODUCT_ID = PRODUCT_CALL_NOT.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description</orderby>
+				<identifiers>external_reference,description</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Product Cash</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>external_reference,description,start_date,end_date,currency_code,principal_amount,fixed_rate_b,fixed_rate,daycount_code,payment_holidays,open_term_b,notice_days,roll_over_b,payment_frequency,compound_frequency,date_roll_code,product_cash.rate_index as rate_index ,rate_index_spread,rate_index_factor,period_gen_rule,disc_cash_flow_b,stub_rule,start_stub_date,end_stub_date,rolling_day,linked_id,roll_over_amount, capitalize_int,custom_flows_b,roll_over_date,amortizing_b,amort_type,amort_rate,amort_frequency,amort_amount,cashflow_locks,cashflow_changed,prin_exch,pmt_offset,pmt_off_bus_day_b,cap_strike,floor_strike,option_type,floater_b,def_reset_offset_b,reset_offset,reset_off_busday_b,reset_holidays,rounding_method,compounding_method, fst_stb_cust_idx_b, fst_stb_idx_x, fst_stb_idx_y, lst_stb_cust_idx_b, lst_stb_idx_x, lst_stb_idx_y, include_first_b,include_last_b,man_first_reset_b,first_reset_rate, reset_averaging_b, reset_avg_method, sample_freq, sample_start_off, sample_period_rule,  sample_weekday, reset_timing,withholding_tax_rate, term_mandatory, reset_date_rule, pmt_date_rule, accrual_date_rule, sales_margin, flows_flag</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@product_cash</from>
+				<where>trade.PRODUCT_ID = product_desc.PRODUCT_ID and product_desc.PRODUCT_ID = product_cash.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>external_reference,description</orderby>
+				<identifiers>external_reference,description</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>BOCre</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>EXTERNAL_REFERENCE, product_desc.DESCRIPTION as DESCRIPTION, bo_cre_type,bo_cre.DESCRIPTION as cre_description,cre_type,original_event,bo_cre.effective_date as effective_date,booking_date,acc_rule_id,sent_date,cre_status,sent_status, matching,bo_cre.book_id as book_id,config_id,bo_cre.settlement_date as settlement_date,bo_cre.trade_date as trade_date</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@bo_cre</from>
+				<where> bo_cre.trade_id = trade.TRADE_ID and trade.product_id = product_desc.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>EXTERNAL_REFERENCE,product_desc.DESCRIPTION,BO_CRE_TYPE</orderby>
+				<identifiers>external_reference,description,BO_CRE_TYPE</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>BOCre Attributes</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>EXTERNAL_REFERENCE,product_desc.DESCRIPTION,BO_CRE_TYPE, ATTRIBUTE_NAME, ATTRIBUTE_VALUE</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@bo_cre, @@prefix@@CRE_ATTRIBUTE</from>
+				<where>bo_cre.BO_CRE_ID = CRE_ATTRIBUTE.cre_id and bo_cre.trade_id = trade.TRADE_ID and trade.product_id = product_desc.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>EXTERNAL_REFERENCE,product_desc.DESCRIPTION,BO_CRE_TYPE, ATTRIBUTE_NAME</orderby>
+				<identifiers>external_reference,description,BO_CRE_TYPE, ATTRIBUTE_NAME</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>BOTransfer</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>EXTERNAL_REFERENCE,product_desc.DESCRIPTION as DESCRIPTION, TRANSFER_TYPE, event_type,transfer_status,xfer_action, bo_transfer.product_family as product_family, bo_transfer.product_type as product_type,amount,amount_ccy,trade_ccy,payreceive_type,bo_transfer.value_date as value_date,bo_transfer.settle_date as settle_date,ext_le_id,ext_le_role,ext_sdi,ext_agent_le_id,ext_sdi_status,int_sdi,int_agent_le_id,int_sdi_status,gl_account_id,netting_key,start_time_limit,delivery_type,other_amount,bo_transfer.book_id as book_id, available,bo_transfer.trade_date as trade_date,netted_transfer,bo_transfer.bundle_id as bundle_id,int_le_id, int_le_role,real_settle_amount,is_known,settlement_method,is_fixed,is_return,is_payment,cash_account_id,avail_date,int_cash_sdi,ext_cash_sdi,real_cash_amount,bo_transfer.description as xfer_description,orig_cpty_id,manual_sdi,manual_cash_sdi,nominal_amount,booking_date</select>
+				<from>@@prefix@@trade, @@prefix@@product_desc, @@prefix@@bo_transfer</from>
+				<where>bo_transfer.trade_id = trade.TRADE_ID and trade.product_id = product_desc.PRODUCT_ID and trade.entered_date>=@@valueDate@@</where>
+				<orderby>trade.EXTERNAL_REFERENCE,product_desc.DESCRIPTION,TRANSFER_TYPE</orderby>
+				<identifiers>external_reference,description,TRANSFER_TYPE</identifiers>
+			</item>
+		</query>
+	</compare>
+</config>

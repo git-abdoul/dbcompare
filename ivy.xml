@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+	<info organisation="lu.sgbt.calypso" module="DbCompare" revision="${dbCompare.version}" status="integration" /> 
+
+	<configurations>
+		<conf name="default" visibility="public" />
+		<conf name="compile" visibility="public" extends="default" />
+		<conf name="test" visibility="public" extends="compile" />
+		<conf name="sgbt" visibility="public" />
+		<conf name="sgbt_custom" visibility="public"/>
+	</configurations>
+	 
+	<publications> 
+		<artifact type="jar" ext="jar" /> 
+  	</publications> 
+
+	<dependencies>
+		<dependency org="lu.sgbt.calypso" name="CyCommon" rev="${sgbtcalypso.version}" conf="compile->default" transitive="false"/>
+		<dependency org="com.calypso-14404" name="calypso" rev="14.4.0.4" conf="compile->default" transitive="false"/>
+		<dependency org="com.calypso-14404" name="calypso-core" rev="4.0.2" conf="compile->default" transitive="false"/>
+		<dependency org="com.calypso-14404" name="log4j" rev="1.2.15" conf="compile->default" transitive="false"/>
+		<dependency org="com.calypso-14404" name="ojdbc6" rev="14.4.0.4" conf="sgbt_custom,compile->default" transitive="false"/>
+	</dependencies>
+</ivy-module>

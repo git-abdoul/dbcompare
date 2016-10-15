@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<project name="DbCompare" xmlns:ivy="antlib:org.apache.ivy.ant" default="package" basedir=".">
+	<loadproperties srcFile="../DbCompare/ivysettings-dbCompare.properties" />		
+		
+	<property name="project.version"    value="${dbCompare.version}"/>
+	
+	<import file="../CyMain/build.xml" />
+	
+	<property name="deploy.tag" value="${TAG_TO_BUILD}"/>
+	
+	<target name="copy_properties_main">
+		<echo message="*** [COPY] Copy main properties files ***" />
+		<copy todir="${main.build.dir}" failonerror="false">
+			<fileset dir="${main.resources.dir}">
+				<include name="*" />
+			</fileset>	
+		</copy>
+	</target>
+	
+	<target name="publish-local">
+		<ivy:resolve conf="compile"/>
+		<ivy:publish resolver="internal" revision="${project.version}" overwrite="true" publishivy="true" >
+			<artifacts pattern="target/[artifact]-[revision](-[classifier]).[ext]"/>
+		</ivy:publish>
+	</target>
+
+	<target name="package" depends="update-dependencies, create_jar, publish-local">
+		<echo message="*** Package '${jar.filename}' tar file ***" />
+		<mkdir dir="${dest.dir}/DbCompare/conf"/>
+		<mkdir dir="${dest.dir}/DbCompare/logs"/>
+		<mkdir dir="${dest.dir}/DbCompare/results"/>
+		<mkdir dir="${dest.dir}/DbCompare/resources"/>
+		<copy todir="${dest.dir}/DbCompare/resources" failonerror="false">
+			<fileset dir="${main.resources.dir}">
+				<include name="**/*" />
+			</fileset>	
+		</copy>
+		<tar destfile="${dest.dir}/${jar.filename}-${deploy.tag}.tar">
+			<tarfileset dir="${basedir}/bin" prefix="/DbCompare/bin" preserveLeadingSlashes="true">
+				<include name="*" />
+			</tarfileset>
+			<tarfileset dir="${lib.dir}" prefix="/DbCompare/lib" preserveLeadingSlashes="true">
+				<include name="*" />
+			</tarfileset>
+			<tarfileset dir="${dest.dir}" prefix="/DbCompare/lib" preserveLeadingSlashes="true">
+				<include name="${jar.filename}.jar" />
+			</tarfileset>
+			<tarfileset dir="${dest.dir}/DbCompare" prefix="/DbCompare" preserveLeadingSlashes="true">
+				<include name="*" />
+			</tarfileset>
+			<tarfileset dir="${dest.dir}/DbCompare/resources" prefix="/DbCompare/resources" preserveLeadingSlashes="true">
+				<include name="**/*" />
+			</tarfileset>
+		</tar>
+		<delete dir="${dest.dir}/DbCompare" failonerror="false"/>
+	</target>
+	
+	<target name="package-local" depends="package">
+		<echo message="*** Package '${jar.filename}' tar file ***" />
+	</target>
+
+	
+</project>

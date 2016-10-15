@@ -1,0 +1,608 @@
+<?xml version="1.0"?>
+<config>
+	<title>@@ENVXXX@@ / @@ENVYYY@@ Setups Comparison</title>
+	<database>
+		<name>@@ENVXXX@@</name>
+		<url>@@ENVXXX.DBURL@@</url>
+		<user>@@ENVXXX.DBUSER@@</user>
+		<pwd>@@ENVXXX.DBPWD@@</pwd>
+		<driver>oracle.jdbc.OracleDriver</driver>
+		<prefix-schema>@@ENVXXX.DBPREFIXSCHEMA@@</prefix-schema>
+		<active>true</active>
+	</database>
+	<database>
+		<name>@@ENVYYY@@</name>
+		<url>@@ENVYYY.DBURL@@</url>
+		<user>@@ENVYYY.DBUSER@@</user>
+		<pwd>@@ENVYYY.DBPWD@@</pwd>
+		<driver>oracle.jdbc.OracleDriver</driver>
+		<prefix-schema>@@ENVYYY.DBPREFIXSCHEMA@@</prefix-schema>
+		<active>true</active>
+	</database>
+	<default-scenario>
+		<type>env</type>
+		<reference>@@ENVXXX@@</reference>
+		<target>@@ENVYYY@@</target>
+	</default-scenario>	
+	<compare>	
+		<query>
+			<name>workflow</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>case when wfw_transition.process_org_id != 0 then legal_entity.short_name else 'ALL' end AS po, event_class, status, use_stp_b, possible_action,resulting_status,same_user_b, product_type, msg_type, log_completed_b, kick_cutoff_b, create_task_b, sd_filter,prefered_b,update_only_b,gen_int_event_b,needs_man_auth_b</select>
+				<from>@@prefix@@wfw_transition</from>
+				<left-join>@@prefix@@legal_entity ON wfw_transition.PROCESS_ORG_ID = legal_entity.LEGAL_ENTITY_ID</left-join>
+				<orderby>event_class, status, possible_action, resulting_status</orderby>
+				<identifiers>po,event_class,msg_type,product_type,status,possible_action,resulting_status</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>	
+		<query>
+			<name>Workflow rules</name>
+			<check-duplicates>false</check-duplicates>
+			<item target="">
+				<select>case when wfw_transition.process_org_id != 0 then legal_entity.short_name else 'ALL' end AS po,event_class,msg_type,product_type,status,possible_action,resulting_status,rule_name</select>
+				<from>@@prefix@@wfw_transition</from>
+				<left-join>@@prefix@@bo_workflow_rule ON wfw_transition.WORKFLOW_ID=bo_workflow_rule.ID</left-join>
+				<left-join>@@prefix@@legal_entity ON wfw_transition.PROCESS_ORG_ID = legal_entity.LEGAL_ENTITY_ID</left-join>				
+				<orderby>po,event_class,msg_type,product_type,status,possible_action,resulting_status,rule_name</orderby>
+				<identifiers>po,event_class,msg_type,product_type,status,possible_action,resulting_status</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Message Setup</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>case when advice_config.PO_ID != 0 then legal_entity.short_name else 'ALL' end AS po,event_type,product_type, message_type,receiver_role, send_contact_type, rec_contact_type,default_language, address_method, gateway, always_send, template_name,matching,inactive,format_type, sd_filter,receiver_id,grouping,flags</select>
+				<from>@@prefix@@advice_config</from>
+				<left-join>@@prefix@@legal_entity on advice_config.PO_ID=legal_entity.LEGAL_ENTITY_ID</left-join>
+				<identifiers>po,message_type,event_type,product_type,receiver_role,rec_contact_type,send_contact_type,address_method,sd_filter,default_language</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Domain values</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select> name, value, description</select>
+				<from>@@prefix@@domain_values</from>
+				<orderby>name,value</orderby>
+				<identifiers>name,value</identifiers>
+			</item>
+		</query>
+	</compare>	
+	<compare>		
+		<query>
+			<name>Static Data Filters</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>sd_filter_name, comments,groups</select>
+				<from>@@prefix@@sd_filter</from>
+				<orderby>sd_filter_name</orderby>
+				<identifiers>sd_filter_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>
+		<query>
+			<name>Static Data Filter Elements</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>sd_filter_name, element_name, element_type, is_value, is_min_inclusive, is_max_inclusive</select>
+				<from>@@prefix@@sd_filter_element</from>
+				<orderby>sd_filter_name, element_name, element_type</orderby>
+				<identifiers>sd_filter_name, element_name, element_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	
+	<compare>
+		<query>
+			<name>Static Data Filter Domains</name>
+			<check-duplicates>false</check-duplicates>
+			<item target="">
+				<select>sd_filter_name, element_name, element_type, domain_value</select>
+				<from>@@prefix@@sd_filter_domain</from>
+				<orderby>sd_filter_name, element_name, element_type, domain_value</orderby>
+				<identifiers>sd_filter_name, element_name, element_type</identifiers>
+			</item>
+		</query>
+	</compare>	
+	<compare>		
+		<query>
+			<name>Trade Filters</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>trade_filter_name,comments,settle_date_min,settle_date_max,sql_from_clause,sql_where_clause,mat_date_min,mat_date_max,caching_b,setledt_tenor_min,setledt_tenor_max, matdt_tenor_min,matdt_tenor_max,time_zone,holidays,check_hol_b,exchange_traded_b,created_by,cache_expiry,filter_type</select>
+				<from>@@prefix@@trade_filter</from>
+				<orderby>trade_filter_name</orderby>
+				<identifiers>trade_filter_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>FilterSet</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>filter_set_name,comments</select>
+				<from>@@prefix@@filter_set</from>
+				<orderby>filter_set_name</orderby>
+				<identifiers>filter_set_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Scheduled Task</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>task_type,sched_task.external_ref,legal_entity.SHORT_NAME as po,trade_filter, filter_set,pricing_env,pricer_measures,time_zone,from_days,to_days ,sched_task.holidays,user_name, publish_b,execute_b,send_email_b,val_time,undo_time,valdate_offset,exec_hol,sched_task.comments, risk_cfg_name,date_rule.DATE_RULE_NAME,exec_ds_b, sched_task.description,read_only_srvr_b,private_b,is_deactivated,skip_exec_b,skip_cutoff_time</select>
+				<from>@@prefix@@sched_task</from>
+				<left-join>@@prefix@@legal_entity ON sched_task.po_id = legal_entity.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@date_rule ON sched_task.DATE_RULE_ID=date_rule.DATE_RULE_ID</left-join>
+				<orderby>task_type,sched_task.external_ref,po</orderby>
+				<identifiers>task_type,external_ref,po</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Accounting Rules</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_rule_name, currency_rule,daily_closing,acc_holiday_list, reversal_rule,adjustment_days,pricing_env_name,firstlast_b,checkpe_b,acc_rule_type,date_rule.DATE_RULE_NAME,case when acc_rule.po_id != 0 then legal_entity.short_name else 'ALL' end AS PO,pos_agg_conf.NAME, liq_config_name.NAME, acc_rule_date.closing_date</select>
+				<from>@@prefix@@acc_rule</from>
+				<left-join>@@prefix@@legal_entity ON acc_rule.po_id = legal_entity.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@date_rule ON acc_rule.DATE_RULE=date_rule.DATE_RULE_ID</left-join>
+				<left-join>@@prefix@@liq_config_name ON acc_rule.LIQ_CONFIG_ID=liq_config_name.ID</left-join>
+				<left-join>@@prefix@@pos_agg_conf ON acc_rule.LIQ_AGG_CONF_ID=pos_agg_conf.pos_agg_conf_id</left-join>
+				<left-join>@@prefix@@acc_rule_date ON acc_rule.acc_rule_id=acc_rule_date.acc_rule_id</left-join>
+				<orderby>acc_rule_name,currency_rule</orderby>
+				<identifiers>acc_rule_name,currency_rule</identifiers>
+			</item>
+		</query>
+	</compare>	
+	<compare>		
+		<query>
+			<name>Accounting Rules Config (Events)</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_rule_name,acc_event_type,sign,debit_acc_id,credit_acc_id</select>
+				<from>@@prefix@@acc_rule_config, @@prefix@@acc_rule</from>
+				<where>acc_rule.acc_rule_id = acc_rule_config.acc_rule_id</where>
+				<orderby>acc_rule_name, acc_event_type, sign</orderby>
+				<identifiers>acc_rule_name,acc_event_type, sign</identifiers>
+			</item>
+		</query>
+	</compare>	
+	<compare>		
+		<query>
+			<name>User Group</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>group_name,comments,filter_set,ro_filter_set,ref_user_name,is_admin_b,is_system_b</select>
+				<from>@@prefix@@user_group_name</from>
+				<orderby>group_name</orderby>
+				<identifiers>group_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>User Max Permission Attribute</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>user_name,type,value</select>
+				<from>@@prefix@@user_max_perm_attr</from>
+				<orderby>user_name,type</orderby>
+				<identifiers>user_name,type</identifiers>
+			</item>
+		</query>
+	</compare>	
+	<compare>		
+		<query>
+			<name>Settlement Instruction Delivery (SDI)</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>SDI_TYPE,LE_SETTLE_DELIVERY.NAME AS SDI_NAME,AGT.SHORT_NAME AS AGENT_LE,AGENT_CONTACT,AGENT_ACCOUNT,MESSAGE_TO_AGENT,AGT.SHORT_NAME AS INT_LE,INT_CONTACT,INT_ACCOUNT,MESSAGE_TO_INT,BENE.SHORT_NAME AS BENEFICIARY,BENE_CONTACT,GLACC.ACC_ACCOUNT_NAME AS GL_ACCOUNT,DIRECT_B,METHOD,CURRENCY_LIST,PRODUCT_LIST,LE_SETTLE_DELIVERY.LE_ROLE AS SDI_LE_ROLE,PREFERRED_B,PAY_RECEIVE,EFFECTIVE_FROM,EFFECTIVE_TO,PORG.SHORT_NAME as PO,LE_SETTLE_DELIVERY.COMMENTS,INT_GLACC.ACC_ACCOUNT_NAME as INT_GL_ACCOUNT,SD_FILTER,PRIORITY,LINK_ID,AGT.SHORT_NAME AS INT_LE_2,INT_CONTACT_2,INT_ACCOUNT_2,REGISTR_LIST,MESSAGE_TO_INT2,TRADE_CPTY_ID,BENE_NAME,AGENT_NAME,INT_NAME,AGENT_SUB_ACC,INT_SUB_ACC,INT2_SUB_ACC,LE_SETTLE_DELIVERY.TRADE_DATE_B,BENE_IDEN,AGENT_IDEN,INT_IDEN,INT2_IDEN,ADDRESSEE_LE</select>
+				<from>@@prefix@@le_settle_delivery</from>
+				<left-join>@@prefix@@LEGAL_ENTITY BENE ON LE_SETTLE_DELIVERY.BENE_LE=BENE.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@LEGAL_ENTITY AGT ON LE_SETTLE_DELIVERY.AGENT_LE=AGT.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@LEGAL_ENTITY INTERM ON LE_SETTLE_DELIVERY.INT_LE=INTERM.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@LEGAL_ENTITY INTERM2 ON LE_SETTLE_DELIVERY.INT_LE_2=INTERM2.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@LEGAL_ENTITY PORG ON LE_SETTLE_DELIVERY.PROCESS_ORG_ID=PORG.LEGAL_ENTITY_ID</left-join>
+				<left-join>@@prefix@@ACC_ACCOUNT GLACC ON LE_SETTLE_DELIVERY.GL_ACCOUNT_ID=GLACC.ACC_ACCOUNT_ID</left-join>
+				<left-join>@@prefix@@ACC_ACCOUNT INT_GLACC ON LE_SETTLE_DELIVERY.INT_GL_ACC_ID=INT_GLACC.ACC_ACCOUNT_ID</left-join>
+				<where>effective_to>@@valueDate@@ or effective_to is null</where>
+				<orderby>SDI_NAME,PO,BENEFICIARY,SDI_LE_ROLE,GL_ACCOUNT,CURRENCY_LIST,PRODUCT_LIST,PREFERRED_B,PRIORITY</orderby>
+				<identifiers>SDI_NAME,PO,BENEFICIARY,SDI_LE_ROLE,GL_ACCOUNT,CURRENCY_LIST,PRODUCT_LIST,PREFERRED_B,PRIORITY</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Product Access</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>group_name,product_family,trade_status,trade_action,status_type,message_type</select>
+				<from>@@prefix@@access_product</from>
+				<orderby>group_name,status_type,product_family,trade_status,trade_action,message_type</orderby>
+				<identifiers>group_name,status_type,product_family,trade_status,trade_action,message_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book Access - Currency</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>book.BOOK_NAME as book_name,book_bundle,currency_code</select>
+				<from>@@prefix@@perm_book_currency, @@prefix@@book</from>
+				<where>perm_book_currency.BOOK_ID=book.BOOK_ID</where>
+				<orderby>book_name</orderby>
+				<identifiers>book_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book Access - Currency Pair</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>book.BOOK_NAME as book_name,book_bundle,currency_code1,currency_code2</select>
+				<from>@@prefix@@perm_book_cur_pair, @@prefix@@book</from>
+				<where>perm_book_cur_pair.BOOK_ID=book.BOOK_ID</where>
+				<orderby>book_name</orderby>
+				<identifiers>book_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book Access - Product</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>book.BOOK_NAME as book_name,book_bundle,product_family</select>
+				<from>@@prefix@@perm_book_product, @@prefix@@book</from>
+				<where>perm_book_product.BOOK_ID=book.BOOK_ID</where>
+				<orderby>book_name</orderby>
+				<identifiers>book_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricing Parameters</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>pricing_param_name,comments</select>
+				<from>@@prefix@@pricing_param</from>
+				<orderby>pricing_param_name</orderby>
+				<identifiers>pricing_param_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricer Configs</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>pricer_config_name,description,parent_name,lazy_refresh_b</select>
+				<from>@@prefix@@pricer_config</from>
+				<orderby>pricer_config_name</orderby>
+				<identifiers>pricer_config_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricing Envs</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>pricing_env_name,comments,base_currency,pricer_config_name,quote_set_name,pricing_param_name,time_zone,day_change_rule</select>
+				<from>@@prefix@@pricing_env</from>
+				<orderby>pricing_env_name</orderby>
+				<identifiers>pricing_env_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricing Measures</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>measure_name, measure_class_name, measure_id, measure_comment</select>
+				<from>@@prefix@@pricer_measure</from>
+				<orderby>measure_name</orderby>
+				<identifiers>measure_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricing Param Items</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>pricing_param_name,product_type,attribute_name, attribute_value</select>
+				<from>@@prefix@@pricing_param_items</from>
+				<orderby>pricing_param_name,product_type,attribute_name</orderby>
+				<identifiers>pricing_param_name,product_type,attribute_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Pricing Param Name</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>param_name, param_type, param_domain, param_comment, is_global_b, display_name, default_value</select>
+				<from>@@prefix@@pricing_param_name</from>
+				<orderby>param_name</orderby>
+				<identifiers>param_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Date Rule</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>date_rule_name,date_rule_desc,date_rule_day,date_rule_month,date_rule_rank,date_rule_weekday,date_rule_type,month_list,add_days,bus_cal_b,holidays,rel_rule,check_holidays,date_roll,add_months,rel_type,add_bus_days_b,add_term_tenor</select>
+				<from>@@prefix@@date_rule</from>
+				<orderby>date_rule_name</orderby>
+				<identifiers>date_rule_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Future Contract</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>contract_name, exchange_code, currency_code, future_type, settlement_type, underlying_amount, var_underlying_amt, quote_type, tick_size, min_move_in_ticks, tick_value, nb_trade_contract, rate_index_code, months, relative_months, tradeday_rank,  tradeday_week_day,  tradeday_mth_end_b, tradeday_add_days, fst_del_rank,  fst_del_week_day,  fst_del_m_begin_b,  fst_del_add_days, last_del_rank,  last_del_week_day,  last_del_m_end_b,  last_del_add_days, fst_not_rank,  fst_not_week_day,  fst_not_m_begin_b,  fst_not_add_days,  fst_not_add_days_b,  holidays, und_holidays, und_currency, underlying_tenor,  und_bond_type,  und_bond_coupon,  future_name_month,  fst_del_add_days_b, add_bus_day_b, relative_month_b, time_zone, time_minute, trading_end_rule,  first_del_rule, last_del_rule, date_generator, und_rel_product_name,  und_rel_product_type,  serial_generator, bench_add_days, bench_add_days_b, quote_decimals, dateformat, first_notify_rule, last_notify_rule, und_benchmark_name</select>
+				<from>@@prefix@@future_contract</from>
+				<orderby>contract_name</orderby>
+				<identifiers>contract_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Product Code</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>product_code,code_type,unique_b,searchable_b,mandatory_b,product_list</select>
+				<from>@@prefix@@product_code</from>
+				<orderby>product_code</orderby>
+				<identifiers>product_code</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>book_name,legal_entity.short_name as le_name,activity,location,book.comments as comments,acc_book.acc_book_name,base_currency,eod_time,book.holidays as holidays</select>
+				<from>@@prefix@@book, @@prefix@@acc_book, @@prefix@@legal_entity</from>
+				<where>book.acc_book_id=acc_book.acc_book_id and book.legal_entity_id=legal_entity.legal_entity_id</where>
+				<orderby>book_name</orderby>
+				<identifiers>book_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book Attribute Value</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>book.book_name as name, attribute_name, attribute_value</select>
+				<from>@@prefix@@book_attr_value, @@prefix@@book</from>
+				<where>BOOK.BOOK_ID=BOOK_ATTR_VALUE.BOOK_ID</where>
+				<orderby>name, attribute_name</orderby>
+				<identifiers>name, attribute_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Book Attribute</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>attribute_name, comments</select>
+				<from>@@prefix@@book_attribute</from>
+				<orderby>attribute_name</orderby>
+				<identifiers>attribute_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Currency</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>currency_code,rounding,rounding_method,iso_code,country,default_holidays,rate_index_code,default_day_count,group_list,spot_days,default_tenor,description,time_zone,external_reference,rate_decimals,warning_threshold,settlement_cutoff_time,settlement_cutoff_timezone,is_precious_metal_b,non_deliverable_b</select>
+				<from>@@prefix@@currency_default</from>
+				<orderby>currency_code</orderby>
+				<identifiers>currency_code</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Holiday</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>holiday_code, currency_code, description, fst_day_weekend, scd_day_weekend, iso_code</select>
+				<from>@@prefix@@holiday_code</from>
+				<orderby>holiday_code</orderby>
+				<identifiers>holiday_code</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Accounting Book</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_book_name,comments,classification</select>
+				<from>@@prefix@@acc_book</from>
+				<orderby>acc_book_name</orderby>
+				<identifiers>acc_book_name</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Accounting Book Rule Link</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_book.acc_book_name as acc_book_name, product_type, acc_rule.acc_rule_name as acc_rule_name, sd_filter</select>
+				<from>@@prefix@@acc_book_rule_link,@@prefix@@acc_book,@@prefix@@acc_rule</from>
+				<where>acc_book_rule_link.acc_book_id=acc_book.acc_book_id and acc_book_rule_link.acc_rule_id=acc_rule.acc_rule_id</where>
+				<orderby>acc_book_name, product_type, acc_rule_name, sd_filter</orderby>
+				<identifiers>acc_book_name, product_type, acc_rule_name, sd_filter</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Accounting Event Config</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_event_type, product_type, description, retro_activity, acc_event_class, booking_type, event_property, pricing_measures, is_fee</select>
+				<from>@@prefix@@acc_event_config</from>
+				<orderby>acc_event_type, product_type</orderby>
+				<identifiers>acc_event_type, product_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Accounting Trigger Event</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>acc_event_config.acc_event_type as acc_event_type, acc_event_config.product_type as product_type, trig_event_type</select>
+				<from>@@prefix@@acc_trig_event, @@prefix@@acc_event_config</from>
+				<where>acc_trig_event.acc_event_cfg_id=acc_event_config.acc_event_cfg_id</where>
+				<orderby>acc_event_type,product_type,trig_event_type</orderby>
+				<identifiers>acc_event_type,product_type,trig_event_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Advice Document</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>legal_entity.short_name as po,event_type,product_type, message_type,receiver_role, sd_filter,send_contact_type, rec_contact_type,default_language, address_method, gateway, always_send, template_name,matching,inactive,format_type,receiver_id,grouping,flags </select>
+				<from>@@prefix@@advice_config</from>
+				<left-join>@@prefix@@legal_entity on advice_config.po_id=legal_entity.legal_entity_id</left-join>
+				<orderby>event_type,product_type, message_type,receiver_role,sd_filter</orderby>
+				<identifiers>event_type,product_type, message_type,receiver_role,sd_filter</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Message sender configuration</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>advice_status, product_type, advice_type, address_method, gateway, send_b, save_b, publish_b, by_gateway_b, by_method_b, sd_filter</select>
+				<from>@@prefix@@send_config</from>
+				<orderby>advice_status, product_type, advice_type, address_method, gateway</orderby>
+				<identifiers>advice_status, product_type, advice_type, address_method, gateway</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Netting Config</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>netting_type, netting_key, netting_handler</select>
+				<from>@@prefix@@netting_config</from>
+				<orderby>netting_type, netting_key, netting_handler</orderby>
+				<identifiers>netting_type, netting_key, netting_handler</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Task Internal Reference</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>event_class, task_level, sequence, sd_filter, type, value</select>
+				<from>@@prefix@@task_internal_ref</from>
+				<orderby>event_class, task_level, sequence</orderby>
+				<identifiers>event_class, task_level, sequence</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Task Event Config</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>group_name, event_type</select>
+				<from>@@prefix@@task_event_config</from>
+				<orderby>group_name, event_type</orderby>
+				<identifiers>group_name, event_type</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Task Book Config</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>group_name, book_name, book_bundle</select>
+				<from>@@prefix@@task_book_config</from>
+				<left-join>@@prefix@@book on task_book_config.book_id=book.book_id</left-join>
+				<orderby>group_name, book_name, book_bundle</orderby>
+				<identifiers>group_name, book_name, book_bundle</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Rate Index</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>CURRENCY_CODE,RATE_INDEX_CODE,RATE_INDEX_TENOR,RATE_INDEX_SOURCE, DAY_COUNT,DATE_ROLL_CODE,END_TO_END_B</select>
+				<from>@@prefix@@RATE_INDEX</from>
+				<orderby>CURRENCY_CODE,RATE_INDEX_CODE,RATE_INDEX_TENOR,RATE_INDEX_SOURCE</orderby>
+				<identifiers>CURRENCY_CODE,RATE_INDEX_CODE,RATE_INDEX_TENOR,RATE_INDEX_SOURCE</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Rate Index Default</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>CURRENCY_CODE,RATE_INDEX_CODE,RATE_IDX_DAYCOUNT,RESET_DAYS,RESET_HOLIDAYS,DATE_ROLL_CODE,PUBLISH_FREQUENCY,RATE_INDEX_SOURCES,RESET_WEEKDAY,RESET_BUS_LAG_B,RESET_TIME_ZONE,RESET_HOUR,RESET_IN_ARREAR_B,PAY_IN_ARREAR_B,PAYMENT_HOLIDAYS,PAYMENT_BUS_LAG_B,PAYMENT_DAYS,PERIOD_RULE,DEFAULT_SOURCE,CMP_FREQUENCY,QUOTE_TYPE,PUBLISH_DTRULE,INDEX_TYPE,FORMULA,NO_AUTO_INTERP_B,COMMENTS,INTERP_ROUNDING_MTHD,INTERP_ROUNDING_DEC,AVG_METHOD,START_OFFSET,DAY_OF_WEEK,CUTOFF_DAYS,FREQUENCY,AVG_PERIOD_RULE,UNDER_RATE_INDEX,UNADJUST_RESET,AVG_ROUNDING_UNIT,CALCULATION_METHOD, INTERP_METHOD, PUBLICATION_DAY, REFERENCE_DAY,CU_SWAP_CURRENCY_CODE, CU_SWAP_RATE_INDEX_CODE, CU_SWAP_RATE_INDEX_TENOR, CU_SWAP_RATE_INDEX_SOURCE, MATURITY_TENOR, FIXED_CPN_HOLIDAYS, FIXED_CPN_DATEROLL, FXD_DAYCOUNT, FLT_CPN_HOLIDAYS, FLT_CPN_DATEROLL, FIXED_CPN_FREQ, FLOAT_CPN_FREQ, MAN_FIRST_RESET_B, FXD_PERIOD_RULE, FLT_PERIOD_RULE, FLT_CMP_FREQ, SPC_LAG_B, SPC_LAG_OFFSET, SPC_LAG_HOLIDAYS, SPC_LAG_BUS_CAL_B, FIXED_PO_FORMULA, FLT_PO_FORMULA, FXD_CMP_FREQ, PRINCIPAL_ACTUAL_B, DISCOUNT_METHOD, CHK_FIRST_RESET_B</select>
+				<from>@@prefix@@RATE_INDEX_DEFAULT</from>
+				<orderby>CURRENCY_CODE,RATE_INDEX_CODE</orderby>
+				<identifiers>CURRENCY_CODE,RATE_INDEX_CODE</identifiers>
+			</item>
+		</query>
+	</compare>
+	<compare>		
+		<query>
+			<name>Rate Index Attributes</name>
+			<check-duplicates>true</check-duplicates>
+			<item target="">
+				<select>CURRENCY_CODE,RATE_INDEX_CODE, ATTR_NAME,ATTR_VALUE</select>
+				<from>@@prefix@@RATE_ATTRIBUTES</from>
+				<orderby>CURRENCY_CODE,RATE_INDEX_CODE,ATTR_NAME</orderby>
+				<identifiers>CURRENCY_CODE,RATE_INDEX_CODE,ATTR_NAME</identifiers>
+			</item>
+		</query>
+	</compare>
+</config>

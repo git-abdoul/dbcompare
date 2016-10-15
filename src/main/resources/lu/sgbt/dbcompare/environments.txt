@@ -1,0 +1,8 @@
+DEV_EXT_PLATYPUS|jdbc:oracle:thin:@calludb.dev.ext.sgbt.lu:1521/CALYPSO14.DEV.EXT.SGBT.LU|CALYPSO|f4S0I0Pod4DU|prefix-schema=
+DEV_PLATYPUS|jdbc:oracle:thin:@calludb.dev.sgbt.lu:1521/CALYPSO14.DEV.SGBT.LU|CALYPSO|aE0R7Z4gi2rq|prefix-schema=
+DEV2_PLATYPUS|jdbc:oracle:thin:@callu2db.dev.sgbt.lu:1521/CALYPSO14.DEV2.SGBT.LU|CALYPSO|bMrVqeqRjH5X|prefix-schema=
+DEV3_PLATYPUS|jdbc:oracle:thin:@OLUXCALLUD03.dev.sgbt.lu:1521/CALLUD03.dev.sgbt.lu|CALYPSO|KrGvxmNhaHXd|prefix-schema=
+TEST_PLATYPUS|jdbc:oracle:thin:@calludb.test.sgbt.lu:1521/CALYPSO14.TEST.SGBT.LU|CALYPSO|CIDYmz60D0au|prefix-schema=
+TEST_EXT_PLATYPUS|jdbc:oracle:thin:@calludb.test.ext.sgbt.lu:1521/CALYPSO14.TEST.EXT.SGBT.LU|CALYPSO|wU375JUCYecd|prefix-schema=
+TEST2_EXT_PLATYPUS|jdbc:oracle:thin:@oluxcallut52.test.ext.sgbt.lu:1521/CALLUT52|CALYPSO|qJBjGN0cHLBW|prefix-schema=
+HOM_PLATYPUS|jdbc:oracle:thin:@calludb.hom.sgbt.lu:1521/CALYPSO14.HOM.SGBT.LU|CALYPSO|YleAwpcji8U|prefix-schema=
